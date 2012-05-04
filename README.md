@@ -25,3 +25,6 @@ oryziasはだいたい千行ぐらいのフルスタックなPHPマイクロフ�
 
 + 速いの？
  + oryziasを動かすにはPHP5.3.10以上がたぶん必要です。新しいPHPを使えば何だって速くなります。
+
++ どんなプロジェクトで使われているの？
+ + [phpMyPresentation](https://github.com/oubakiou/phpMyPresentation)（[presentation.bz](http://presentation.bz/)）で使われています。というかそのために作られました。
