@@ -24,7 +24,7 @@ oryziasはだいたい概ね1000行(27KB)ぐらいのフルスタックなPHPマ
  + curlで叩け。
 
 + 速いの？
- + oryziasを動かすにはPHP5.3.10の周辺がたぶん必要です。新しいPHPを使えば何だって速くなります。
+ + xhprofでの凄くおおざっぱな計測だと、FuelPHPの10倍ぐらい。ただし機能は1/10未満。
 
 + どんなプロジェクトで使われているの？
  + [phpMyPresentation](https://github.com/oubakiou/phpMyPresentation)（[presentation.bz](http://presentation.bz/)）で使われています。というかそのために作られました。
