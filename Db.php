@@ -4,22 +4,27 @@ use PDO;
 abstract class Db{
 
     protected static $pdo;
+    protected $dbConnectionKey;
     protected $tableName;
 
-    function __construct(){
+    public function __construct($dbConnectionKey, $dbConfig){
 
-        if(!self::$pdo){
-            $this->connect();
+        if(!isset(self::$pdo[$dbConnectionKey])){
+            $this->connect($dbConnectionKey, $dbConfig);
         }
 
         $this->tableName = array_pop(explode('_', get_class($this)));
 
     }
 
-    function __call($name, $arguments){
+    public function __call($name, $arguments){
         //getByHogeでHogeカラムをキーに1レコード取得
         if(substr($name, 0, 5) == 'getBy'){
             return $this->getByKey($arguments[0], lcfirst(substr($name, 5)));
+        }
+        //getAllByHogeでHogeカラムをキーに対象の全レコード取得
+        if(substr($name, 0, 8) == 'getAllBy'){
+            return $this->getAllByKey($arguments[0], lcfirst(substr($name, 8)));
         }
         //getHogeByFugaでFugaカラムをキーにHogeカラムの値を取得
         elseif(preg_match('/get(.*)By(.*)/', $name, $matches)){
@@ -40,26 +45,20 @@ abstract class Db{
 
     }
 
-    function connect(){
+    protected function connect($dbConnectionKey, $dbConfig){
         try {
-            $dbType = DB_TYPE;
-            $dbName = DB_NAME;
-            $dbServerName = DB_SERVER_NAME;
-            $dbUserName = DB_USER_NAME;
-            $dbUserPassword = DB_USER_PASSWORD;
-
-            $dsn = $dbType . ':dbname=' . $dbName . ';host=' . $dbServerName;
-
-            self::$pdo = new PDO($dsn, $dbUserName, $dbUserPassword);
-            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $dsn = $dbConfig['type'] . ':dbname=' . $dbConfig['name'] . ';host=' . $dbConfig['serverName'];
+            self::$pdo[$dbConnectionKey] = new PDO($dsn, $dbConfig['userName'], $dbConfig['userPassword']);
+            self::$pdo[$dbConnectionKey]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->dbConnectionKey = $dbConnectionKey;
         }
         catch (PDOException $e) {
-            echo 'Connection failed: ' . $e->getMessage();
+        	throw $e;
         }
     }
 
     //paginator付き
-    function fetchAllWithPaginator($sql, $inputParameters=array(), $perPage = 10, $currentPage=1, $pageWidth=3){
+    public function fetchAllWithPaginator($sql, $inputParameters=array(), $perPage = 10, $currentPage=1, $pageWidth=3){
 
         $offset = ($currentPage-1)*$perPage;
         $limit = ' LIMIT ' . intval($offset) . ', ' . intval($perPage) . ' ';//PDO limit bug
@@ -116,8 +115,8 @@ abstract class Db{
     }
 
     //プレースホルダーを利用して全件取得
-    function fetchAll($sql, $inputParameters=array()){
-        $sth = self::$pdo->prepare($sql);
+    public function fetchAll($sql, $inputParameters=array()){
+        $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         if($sth->execute($inputParameters)){
             return $sth->fetchAll();
         }else{
@@ -126,7 +125,7 @@ abstract class Db{
     }
 
     //プレースホルダーを利用して最初の一件取得
-    function fetchRow($sql, $inputParameters=array()){
+    public function fetchRow($sql, $inputParameters=array()){
         if($result = $this->fetchAll($sql, $inputParameters)){
             return $result[0];
         }else{
@@ -135,7 +134,7 @@ abstract class Db{
     }
 
     //プレースホルダーを利用して最初の一件の最初のカラム値を取得
-    function fetchOne($sql, $inputParameters=array()){
+    public function fetchOne($sql, $inputParameters=array()){
         if($result = $this->fetchRow($sql, $inputParameters)){
             return $result[0];
         }else{
@@ -144,12 +143,12 @@ abstract class Db{
     }
 
     //プレースホルダを利用してSQL直実行
-    function execute($sql, $inputParameters=array()){
-        $sth = self::$pdo->prepare($sql);
+    public function execute($sql, $inputParameters=array()){
+        $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         return $sth->execute($inputParameters);
     }
 
-    function insert($data){
+    public function insert($data){
 
         if(!isset($data['createdAt'])){
             $data['createdAt'] = date('Y-m-d H:i:s');
@@ -162,13 +161,13 @@ abstract class Db{
         'VALUES ( ' . implode(',', array_keys($formatData)) . ' )';
 
         if($this->execute($sql, $formatData)){
-            return self::$pdo->lastInsertId();
+            return self::$pdo[$this->dbConnectionKey]->lastInsertId();
         }else{
             return false;
         }
     }
 
-    function getByKey($keyValue, $keyName='id'){
+    public function getByKey($keyValue, $keyName='id'){
         $sql =
         'SELECT * FROM ' . $this->tableName . ' ' .
         'WHERE ' . $keyName . ' = :' . $keyName;
@@ -180,7 +179,19 @@ abstract class Db{
         }
     }
 
-    function getColByKey($keyValue, $keyName='id', $colName='name'){
+    public function getAllByKey($keyValue, $keyName='id'){
+        $sql =
+        'SELECT * FROM ' . $this->tableName . ' ' .
+        'WHERE ' . $keyName . ' = :' . $keyName;
+    
+        if($result = $this->fetchAll($sql, array(':'.$keyName=>$keyValue))){
+            return $result;
+        }else{
+            return false;
+        }
+    }
+    
+    public function getColByKey($keyValue, $keyName='id', $colName='name'){
 
         if(!$result = $this->getByKey($keyValue, $keyName)){
             return false;
@@ -193,7 +204,7 @@ abstract class Db{
         return $result[$colName];
     }
 
-    function replaceByKey($data, $keyName = 'id'){
+    public function replaceByKey($data, $keyName = 'id'){
         //update
         if(isset($data[$keyName]) && $data[$keyName]){
           return $this->updateByKey($data[$keyName], $data, $keyName);
@@ -204,14 +215,14 @@ abstract class Db{
         }
     }
 
-    function deleteByKey($keyValue, $keyName='id'){
+    public function deleteByKey($keyValue, $keyName='id'){
         $sql =
         'DELETE FROM ' . $this->tableName . ' ' .
         'WHERE ' . $keyName . ' = :' . $keyName;
         return $this->execute($sql, array(':'.$keyName=>$keyValue));
     }
 
-    function updateByKey($keyValue, $data, $keyName='id'){
+    public function updateByKey($keyValue, $data, $keyName='id'){
 
         if(!isset($data['updatedAt'])){
             $data['updatedAt'] = date('Y-m-d H:i:s');
@@ -235,7 +246,7 @@ abstract class Db{
         return $this->execute($sql, $formatData);
     }
 
-    static function formatData($data){
+    static public function formatData($data){
         foreach($data as $k=>$v){
             $formatData[':' . $k] = $v;
         }

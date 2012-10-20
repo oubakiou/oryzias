@@ -3,36 +3,52 @@ namespace Oryzias;
 Abstract class Controller{
 
     //trueでhttp接続のみ可
-    protected $http_only;
+    protected $httpOnly;
 
     //trueでhttps接続のみ可
-    protected $https_only;
+    protected $httpsOnly;
 
     protected $template;
     protected $req;
 
-    function __construct(){
+    public function __construct(){
         $this->init();
         $this->exec();
         $this->view();
     }
 
-    function __destruct(){
+    public function __destruct(){
         $_SESSION = $this->s;
     }
 
-    function __get($name){
+    public function __get($name){
 
+    	$token = explode('_', $name);
+    	
         //コントローラ内で$this->db_HogeでModel_Db_Hogeを取得
-        if(substr($name, 0, 3) == 'Db_'){
-            $className = 'Model_Db_' . substr($name, 3);
+        if($token[0] == 'Db'){
+            if(count($token) == 3){
+                $dbConnectionKey = 'default';
+                $tableName = $token[2];
+                $className = 'Model_Db_' . $tableName;
+            }else if(count($token) == 4){
+                $dbConnectionKey = $token[2];
+                $tableName = $token[3];
+                $className = 'Model_Db_' . $dbConnectionKey . $tableName;
+            }
+            
+            if(!isset($this->$name)){
+                $this->$name = new $className($dbConnectionKey, Config::get('db.' . $dbConnectionKey));
+            }
+            return $this->$name;
         }
+        
         //コントローラ内で$this->vld_HogeでModel_Validator_Hogeを取得
-        elseif(substr($name, 0, 4) == 'Vld_'){
+        if($token[0] == 'Vld'){
             $className = 'Model_Validator_' . substr($name, 4);
         }
         //コントローラ内で$this->mdl_HogeでModel_Hogeを取得
-        elseif(substr($name, 0, 4) == 'Mdl_'){
+        elseif($token[0] == 'Mdl'){
             $className = 'Model_' . substr($name, 4);
         }
 
@@ -45,14 +61,28 @@ Abstract class Controller{
     }
 
     protected function init(){
+        
+        $this->setTimezone();
         $this->checkScheme();
         $this->session();
+        
         if(!isset($this->template)){
-            $this->template = new Template();
+            $templateConfig = Config::get('template');
+            //スマホが別テンプレートかつUAがスマホなら設定上書き
+            if($this->isSmartPhone() && ($templateSp = Config::get('templateSp')) ){
+                $templateConfig = $templateSp;
+            }
+            //ガラケーが別テンプレートかつUAがガラケーなら設定上書き
+            elseif($this->isFeaturePhone() && ($templateFp = Config::get('templateFp')) ){
+                $templateConfig = $templateFp;
+            }
+            $this->template = new Template($templateConfig);
         }
+        
         if(!isset($this->req)){
             $this->req = new Request();
         }
+        
         $this->g = $this->req->g;
         $this->p = $this->req->p;
         $this->r = $this->req->r;
@@ -65,14 +95,22 @@ Abstract class Controller{
             $this->s['csrfToken'] = sha1(mt_rand());
         }
     }
+    
+    protected function setTimezone(){
+        //タイムゾーン設定
+        if(!$timeZone = Config::get('timeZone')){
+            $timeZone = 'Asia/Tokyo';
+        }
+        date_default_timezone_set($timeZone);
+    }
 
     //スキーマ指定があれば不一致時にリダイレクト
     protected function checkScheme(){
-        if($this->http_only){
+        if($this->httpOnly){
             if($_SERVER['HTTPS']){
                 $this->r('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
             }
-        }elseif($this->https_only){
+        }elseif($this->httpsOnly){
             if(!$_SERVER['HTTPS']){
                 $this->r('https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
             }
@@ -134,4 +172,44 @@ Abstract class Controller{
         }
     }
 
+    protected  function isSmartPhone(){
+        if($this->isAndroid() || $this->isIphone() || $this->isWindowsPhone()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    protected function isDocomoFeaturePhone(){
+        if(stripos($this->ua, 'DoCoMo') === false){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    
+    protected function isAuFeaturePhone(){
+        if(stripos($this->ua, 'KDDI') === false){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    
+    protected function isSoftBankFeaturePhone(){
+        if(stripos($this->ua, 'SoftBank') === false){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    
+    protected  function isFeaturePhone(){
+        if($this->isDocomoFeaturePhone() || $this->isAuFeaturePhone() || $this->isSoftBankFeaturePhone()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
 }

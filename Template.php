@@ -2,46 +2,63 @@
 namespace Oryzias;
 class Template{
 
-    public $htmlCharset;
+    public $outputCharset;
+    public $templateCharset;
     public $templateDir;
     public $templateCacheDir;
     public $templateCacheDisable;
     public $params;
     public $unEscapedParams;
     public $templateName;
-
-    function __construct(){
-        $this->htmlCharset = HTML_CHARSET;
-        $this->templateDir = TEMPLATE_DIR;
-        $this->templateCacheDir = TEMPLATE_CACHE_DIR;
-        $this->templateCacheDisable = TEMPLATE_CACHE_DISABLE;
-        $this->params      = array();
+    public $postFilters;
+    
+    public function __construct($templateConfig){
+        $this->outputCharset        = $templateConfig['outputCharset'];
+        $this->templateCharset      = $templateConfig['templateCharset'];
+        $this->templateDir          = $templateConfig['templateDir'];
+        $this->templateCacheDir     = $templateConfig['templateCacheDir'];
+        $this->templateCacheDisable = $templateConfig['templateCacheDisable'];
+        $this->params               = array();
+        $this->postFilters          = array();
+        
+        //テンプレートの文字セットと出力したい文字セットが食い違えばフィルター追加
+        if($this->outputCharset != $this->templateCharset){
+            $this->postFilters[] = function($output){
+                return mb_convert_encoding($output, $this->outputCharset, $this->templateCharset);
+            };
+        }
     }
 
-    function setTemplate($templateName){
+    public function setTemplate($templateName){
         $this->templateName = $templateName;
     }
 
-    function getTemplate(){
+    public function getTemplate(){
         return $this->templateName;
     }
 
-    function assign($paramName, $paramValue){
+    public function assign($paramName, $paramValue){
         $this->params[$paramName] = $paramValue;
     }
 
-    function unEscapedAssign($paramName, $paramValue){
+    public function unEscapedAssign($paramName, $paramValue){
         $this->unEscapedParams[$paramName] = $paramValue;
     }
 
-    function fetch(){
+    public function fetch(){
       if(!$this->templateName){
           return false;
       }
-      return $this->execute($this->getConvertedTemplate($this->templateName));
+      $output =  $this->execute($this->getConvertedTemplate($this->templateName));
+      if($this->postFilters){
+          foreach($this->postFilters as $postFilter){
+              $output = $postFilter($output);
+          }
+      }
+      return $output;
     }
 
-    function view(){
+    public function view(){
         echo $this->fetch();
     }
 
@@ -83,7 +100,7 @@ class Template{
 
     protected function execute($convertedTemplate){
         if(isset($this->params)){
-            extract(self::h($this->params, ENT_QUOTES, $this->htmlCharset, true));
+            extract(self::h($this->params, ENT_QUOTES, $this->outputCharset, true));
         }
         if(isset($this->unEscapedParams)){
             extract($this->unEscapedParams);
@@ -97,7 +114,8 @@ class Template{
         return $output;
     }
 
-    static function h($arr, $flags=ENT_QUOTES, $encoding='UTF-8', $double_encode=true){
+    static public function h($arr, $flags=ENT_QUOTES, $encoding='UTF-8', $double_encode=true){
+        
         if(is_array($arr)){
             foreach($arr as $k=>$v){
                 $arr[$k] = self::h($v, $flags, $encoding, $double_encode);

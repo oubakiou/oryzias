@@ -7,20 +7,20 @@ class File{
     public $allowMimeType = array();
     public $err;
 
-    function __construct(){
+    public function __construct(){
 
-        if(defined(UPLOAD_FILE_MAX_SIZE)){
-            $this->allowFileSize = UPLOAD_FILE_MAX_SIZE;
+        if($uploadFileMaxSize = Config::get('file.uploadFileMaxSize')){
+            $this->allowFileSize = $uploadFileMaxSize;
         }else{
             $this->allowFileSize = 1048576;
         }
     }
 
-    function getError(){
+    public function getError(){
         return $this->err;
     }
 
-    function checkFile($file){
+    public function checkFile($file){
 
         if(!$this->isUploadedFile($file['tmp_name'])){
             return false;

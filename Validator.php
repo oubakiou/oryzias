@@ -8,18 +8,21 @@ class Validator{
     protected $error;
     protected $allowKeys;
 
-    function __construct($rules=null){
-        $this->inputCharset = HTML_CHARSET;
+    public function __construct($rules=null, $inputCharset=null){
+        if(!$inputCharset){
+            $inputCharset = Config::get('template.outputCharset');
+        }
+        $this->inputCharset = $inputCharset;
         $this->setRule($rules);
     }
 
-    function setData($data){
+    public function setData($data){
         if($data){
             $this->data = $data;
         }
     }
 
-    function getData(){
+    public function getData(){
 
         if(!$this->allowKeys){
             return $this->data;
@@ -34,13 +37,13 @@ class Validator{
         return $result;
     }
 
-    function setRule($rules=null){
+    public function setRule($rules=null){
         if($rules){
             $this->rules = $rules;
         }
     }
 
-    function isValid(){
+    public function isValid(){
         foreach($this->rules as $elementName=>$rule){
             foreach($rule as $validateName=>$validateParams){
 
@@ -65,16 +68,16 @@ class Validator{
         }
     }
 
-    function getError(){
+    public function getError(){
         return $this->error;
     }
 
-    function unsetError(){
+    public function unsetError(){
         unset($this->error);
     }
 
     //必須
-    function required($input){
+    public function required($input){
         if($input){
             return true;
         }else{
@@ -83,7 +86,7 @@ class Validator{
     }
 
     //数字のみ
-    function numeric($input){
+    public function numeric($input){
         if(ctype_digit($input)){
             return true;
         }else{
@@ -92,7 +95,7 @@ class Validator{
     }
 
     //英数字のみ
-    function alphaNumeric($input){
+    public function alphaNumeric($input){
         if(ctype_alnum($input)){
             return true;
         }else{
@@ -101,7 +104,7 @@ class Validator{
     }
 
     //メールアドレス
-    function email($input){
+    public function email($input){
         if (filter_var($input, FILTER_VALIDATE_EMAIL)) {
             return true;
         }else{
@@ -110,7 +113,7 @@ class Validator{
     }
 
     //URL
-    function url($input){
+    public function url($input){
         if (filter_var($input, FILTER_VALIDATE_URL)) {
             return true;
         }else{
@@ -119,17 +122,17 @@ class Validator{
     }
 
     //最大文字列長
-    function maxStrLen($input, $args){
+    public function maxStrLen($input, $args){
         return $this->rangeStrLen($input, $args);
     }
 
     //最小文字列長
-    function minStrLen($input, $args){
+    public function minStrLen($input, $args){
         return $this->rangeStrLen($input, $args);
     }
 
     //文字列長範囲
-    function rangeStrLen($input, $args){
+    public function rangeStrLen($input, $args){
         $result = true;
         $strlen = mb_strlen($input, $this->inputCharset);
 
@@ -149,17 +152,17 @@ class Validator{
     }
 
     //最大
-    function max($input, $args){
+    public function max($input, $args){
         return range($input, $args);
     }
 
     //最小
-    function min($input, $args){
+    public function min($input, $args){
         return range($input, $args);
     }
 
     //範囲
-    function range($input, $args){
+    public function range($input, $args){
         $result = true;
 
         if(isset($args['min'])){
@@ -178,7 +181,7 @@ class Validator{
     }
 
     //CSRFチェック
-    function checkCsrf($input, $args){
+    public function checkCsrf($input, $args){
         if($input == $_SESSION['csrfToken']){
             return true;
         }else{

@@ -11,16 +11,16 @@ class Image extends File{
 
     public $imageInfo;
 
-    function __construct(){
+    public function __construct(){
 
-        if(defined(UPLOAD_IMG_MAX_SIZE)){
-            $this->allowFileSize = UPLOAD_IMG_MAX_SIZE;
+        if($uploadFileMaxSize = Config::get('image.uploadFileMaxSize')){
+            $this->allowFileSize = $uploadFileMaxSize;
         }else{
             $this->allowFileSize = 1048576;
         }
     }
 
-    function checkFile($file){
+    public function checkFile($file){
 
         if(!$this->isUploadedFile($file['tmp_name'])){
             return false;
@@ -46,7 +46,7 @@ class Image extends File{
         return true;
     }
 
-    function setImageInfo($tmpFileName){
+    public function setImageInfo($tmpFileName){
 
         if(!$info = getimagesize($tmpFileName)){
             $this->err[] = '画像情報の取得に失敗しました';
@@ -67,7 +67,7 @@ class Image extends File{
     }
 
     //縦横比を維持して上限を満たすようリサイズして保存
-    function saveResizeImage($dstFilePath, $maxWidth, $maxHeight){
+    public function saveResizeImage($dstFilePath, $maxWidth, $maxHeight){
 
         if(!$dstFilePath){
             return false;

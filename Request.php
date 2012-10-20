@@ -2,7 +2,7 @@
 namespace Oryzias;
 class Request{
 
-    function __construct(){
+    public function __construct(){
         $this->g = $this->conv($_GET);
         $this->p = $this->conv($_POST);
         $this->r = $this->conv($_REQUEST);
@@ -14,13 +14,13 @@ class Request{
         return $arr;
     }
 
-    static function r_mb_convert_encoding($arr, $to_encoding, $from_encoding){
+    static function r_mb_convert_encoding($arr, $toEncoding, $fromEncoding){
         if(is_array($arr)){
             foreach($arr as $k=>$v){
-                $arr[$k] = $this->r_mb_convert_encoding($v, $to_encoding, $from_encoding);
+                $arr[$k] = $this->r_mb_convert_encoding($v, $toEncoding, $fromEncoding);
             }
         }else{
-            return mb_convert_encoding($str, $to_encoding, $from_encoding);
+            return mb_convert_encoding($str, $toEncoding, $fromEncoding);
         }
         return $arr;
     }
