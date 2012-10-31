@@ -1,7 +1,7 @@
 oryzias
 =======
 
-oryziasはだいたい概ね1000行(27KB)ぐらいのフルスタックなPHPマイクロフレームワークです。
+oryziasはだいたい概ね1500行ぐらいのフルスタックなPHPマイクロフレームワークです。
 
 ##FAQ
 
@@ -30,42 +30,42 @@ oryziasはだいたい概ね1000行(27KB)ぐらいのフルスタックなPHPマ
  + [phpMyPresentation](https://github.com/oubakiou/phpMyPresentation)（[presentation.bz](http://presentation.bz/)）で使われています。というかそのために作られました。
 
 + Nginxでの設定例
-
-    server{
-        
-        listen       80;
-        server_name  example.com.dev;
-        access_log   /var/log/nginx/example.com.dev;
-        error_log    /var/log/nginx/example.comz.dev.error;
-        
-        location / {
-            root /home/dev/example.com.dev/public/;
-            index index.php index.html;
+    
+        server{
+            
+            listen       80;
+            server_name  example.com.dev;
+            access_log   /var/log/nginx/example.com.dev;
+            error_log    /var/log/nginx/example.comz.dev.error;
+            
+            location / {
+                root /home/dev/example.com.dev/public/;
+                index index.php index.html;
+            }
+            
+            if (!-e $request_filename) {
+                set $is_php "true";
+            }
+            
+            if ($uri ~ "^/(css|img|js)/") {
+                set $is_php "false";
+            }
+            
+            if ($uri ~ "^/(robots.txt|favicon.ico)") {
+                set $is_php "false";
+            }
+            
+            if ($is_php = "true"){
+                rewrite ^/(.+)$ /index.php?path=$1 last;
+                break;
+            }
+            
+            location ~ \.php$ {
+                root /home/dev/example.com.dev/public/;
+                fastcgi_pass   127.0.0.1:9000;
+                fastcgi_index  index.php;
+                fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+                include        fastcgi_params;
+            }
         }
-        
-        if (!-e $request_filename) {
-            set $is_php "true";
-        }
-        
-        if ($uri ~ "^/(css|img|js)/") {
-            set $is_php "false";
-        }
-        
-        if ($uri ~ "^/(robots.txt|favicon.ico)") {
-            set $is_php "false";
-        }
-        
-        if ($is_php = "true"){
-            rewrite ^/(.+)$ /index.php?path=$1 last;
-            break;
-        }
-        
-        location ~ \.php$ {
-            root /home/dev/example.com.dev/public/;
-            fastcgi_pass   127.0.0.1:9000;
-            fastcgi_index  index.php;
-            fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
-            include        fastcgi_params;
-        }
-    }
     
