@@ -20,8 +20,8 @@ class Template
         $this->templateDir          = $templateConfig['templateDir'];
         $this->templateCacheDir     = $templateConfig['templateCacheDir'];
         $this->templateCacheDisable = $templateConfig['templateCacheDisable'];
-        $this->params               = array();
-        $this->postFilters          = array();
+        $this->params               = [];
+        $this->postFilters          = [];
         
         //テンプレートの文字セットと出力したい文字セットが食い違えばフィルター追加
         if ($this->templateCharset != $this->outputCharset) {
@@ -100,7 +100,7 @@ class Template
     
     protected function convert($text)
     {
-        $text = preg_replace_callback('/\{\[include\((.*?)\)\]\}/', array($this, 'getConvertedTemplate'), $text);
+        $text = preg_replace_callback('/\{\[include\((.*?)\)\]\}/', [$this, 'getConvertedTemplate'], $text);
         $text = preg_replace('/\{\[\$(.*?)\]\}/', '<?php if(isset(\$$1)): echo \$$1; endif; ?>', $text);
         
         $text = str_replace('{[', '<?php ', $text);

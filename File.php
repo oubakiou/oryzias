@@ -5,7 +5,7 @@ class File
 {
     public $fileInfo;
     public $allowFileSize;
-    public $allowMimeType = array();
+    public $allowMimeType = [];
     public $err;
     
     public function __construct()

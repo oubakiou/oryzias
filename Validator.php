@@ -33,7 +33,7 @@ class Validator
             return $this->data;
         }
         
-        $result = array();
+        $result = [];
         foreach ($this->data as $k=>$v) {
             if (in_array($k, $this->allowKeys)) {
                 $result[$k] = $v;
@@ -55,10 +55,10 @@ class Validator
             foreach ($rule as $validateName=>$validateParams) {
                 
                 if (!isset($validateParams['args'])) {
-                    $validateParams['args'] = array();
+                    $validateParams['args'] = [];
                 }
                 if (!isset($this->data[$elementName])) {
-                    $this->data[$elementName] = array();
+                    $this->data[$elementName] = [];
                 }
                 
                 if (!$this->$validateName($this->data[$elementName], $validateParams['args'])) {

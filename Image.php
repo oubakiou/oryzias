@@ -3,12 +3,12 @@ namespace Oryzias;
 
 class Image extends File
 {
-    public $allowMimeType = array(
+    public $allowMimeType = [
         'image/jpg',
         'image/jpeg',
         'image/gif',
         'image/png',
-    );
+    ];
     
     public $imageInfo;
     

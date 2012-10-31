@@ -118,7 +118,7 @@ abstract class Db
     }
     
     //paginator付き
-    public function fetchAllWithPaginator($sql, $inputParameters=array(), $perPage = 10, $currentPage=1, $pageWidth=3)
+    public function fetchAllWithPaginator($sql, $inputParameters=[], $perPage = 10, $currentPage=1, $pageWidth=3)
     {
         
         $offset = ($currentPage-1)*$perPage;
@@ -176,7 +176,7 @@ abstract class Db
     }
     
     //プレースホルダーを利用して全件取得
-    public function fetchAll($sql, $inputParameters=array())
+    public function fetchAll($sql, $inputParameters=[])
     {
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         if ($sth->execute($inputParameters)) {
@@ -187,7 +187,7 @@ abstract class Db
     }
     
     //プレースホルダーを利用して最初の一件取得
-    public function fetchRow($sql, $inputParameters=array())
+    public function fetchRow($sql, $inputParameters=[])
     {
         if ($result = $this->fetchAll($sql, $inputParameters)) {
             return $result[0];
@@ -197,7 +197,7 @@ abstract class Db
     }
     
     //プレースホルダーを利用して最初の一件の最初のカラム値を取得
-    public function fetchOne($sql, $inputParameters=array())
+    public function fetchOne($sql, $inputParameters=[])
     {
         if ($result = $this->fetchRow($sql, $inputParameters)) {
             return $result[0];
@@ -207,7 +207,7 @@ abstract class Db
     }
     
     //プレースホルダを利用してSQL直実行
-    public function execute($sql, $inputParameters=array())
+    public function execute($sql, $inputParameters=[])
     {
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         return $sth->execute($inputParameters);
@@ -239,7 +239,7 @@ abstract class Db
         'SELECT * FROM ' . $this->tableName . ' ' .
         'WHERE ' . $keyName . ' = :' . $keyName;
         
-        if ($result = $this->fetchRow($sql, array(':'.$keyName=>$keyValue))) {
+        if ($result = $this->fetchRow($sql, [':'.$keyName=>$keyValue])) {
             return $result;
         } else {
             return false;
@@ -258,7 +258,7 @@ abstract class Db
         'WHERE $keyName  = :$keyName ' .
         'ORDER BY $orderCol $orderSec ';
         
-        if ($result = $this->fetchAll($sql, array(':'.$keyName=>$keyValue))) {
+        if ($result = $this->fetchAll($sql, [':'.$keyName=>$keyValue])) {
             return $result;
         } else {
             return false;
@@ -310,7 +310,7 @@ abstract class Db
         $sql =
         'DELETE FROM ' . $this->tableName . ' ' .
         'WHERE ' . $keyName . ' = :' . $keyName;
-        return $this->execute($sql, array(':'.$keyName=>$keyValue));
+        return $this->execute($sql, [':'.$keyName=>$keyValue]);
     }
     
     public function updateByKey($keyValue, $data, $keyName='id')

@@ -22,7 +22,7 @@ class Request
         
     }
     
-    protected function convert($arr = array())
+    protected function convert($arr = [])
     {
         if ($this->converters) {
             foreach ($this->converters as $converter) {
