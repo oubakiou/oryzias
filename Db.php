@@ -1,256 +1,348 @@
 <?php
 namespace Oryzias;
-use PDO;
-abstract class Db{
 
+use PDO;
+
+abstract class Db
+{
     protected static $pdo;
     protected $dbConnectionKey;
     protected $tableName;
-
-    public function __construct($dbConnectionKey, $dbConfig){
-
-        if(!isset(self::$pdo[$dbConnectionKey])){
+    
+    public function __construct($dbConnectionKey, $dbConfig)
+    {
+        
+        if (!isset(self::$pdo[$dbConnectionKey])) {
             $this->connect($dbConnectionKey, $dbConfig);
         }
-
+        
         $this->tableName = array_pop(explode('_', get_class($this)));
-
+        
     }
-
-    public function __call($name, $arguments){
-        //getByHogeでHogeカラムをキーに1レコード取得
-        if(substr($name, 0, 5) == 'getBy'){
-            return $this->getByKey($arguments[0], lcfirst(substr($name, 5)));
+    
+    public function __call($name, $arguments)
+    {
+        if (substr($name, 0, 5) == 'getBy') {
+            //getByHogeでHogeカラムをキーに1レコード取得
+            return $this->getByKey($arguments[0], self::formatColName(substr($name, 5)));
         }
-        //getAllByHogeでHogeカラムをキーに対象の全レコード取得
-        if(substr($name, 0, 8) == 'getAllBy'){
-            return $this->getAllByKey($arguments[0], lcfirst(substr($name, 8)));
+        elseif (preg_match('/getAllBy(.*)OrderBy(.*)Desc/', $name, $matches)) {
+            //getAllByHogeOrderByFugaDescでHogeカラムをキーにFugaで降順ソートした対象の全レコード取得
+            return $this->getAllByKey(
+                    $arguments[0],
+                    self::formatColName($matches[1]),
+                    self::formatColName($matches[2]),
+                    'DESC'
+            );
         }
-        //getHogeByFugaでFugaカラムをキーにHogeカラムの値を取得
-        elseif(preg_match('/get(.*)By(.*)/', $name, $matches)){
-            return $this->getColByKey($arguments[0], lcfirst($matches[2]), lcfirst($matches[1]));
+        elseif (preg_match('/getAllBy(.*)OrderBy(.*)Asc/', $name, $matches)) {
+            //getAllByHogeOrderByFugaDescでHogeカラムをキーにFugaで昇順ソートした対象の全レコード取得
+            return $this->getAllByKey(
+                    $arguments[0],
+                    self::formatColName($matches[1]),
+                    self::formatColName($matches[2]),
+                    'ASC'
+            );
+        } elseif(substr($name, 0, 8) == 'getAllBy') {
+            //getAllByHogeでHogeカラムをキーに対象の全レコード取得
+            return $this->getAllByKey($arguments[0], self::formatColName(substr($name, 8)));
+        } elseif(preg_match('/getAll(.*)By(.*)OrderBy(.*)Desc/', $name, $matches)) {
+            //getAllHogeByFugaOrderByPiyoDescでFugaカラムをキーPiyoで降順ソートされたHogeカラムの値を取得
+            return $this->getAllColByKey(
+                    $arguments[0],
+                    self::formatColName($matches[2]),
+                    self::formatColName($matches[1]),
+                    self::formatColName($matches[3]),
+                    'DESC'
+            );
+        } elseif(preg_match('/getAll(.*)By(.*)OrderBy(.*)Asc/', $name, $matches)) {
+            //getAllHogeByFugaOrderByPiyoDescでFugaカラムをキーPiyoで昇順ソートされたHogeカラムの値を取得
+            return $this->getAllColByKey(
+                    $arguments[0],
+                    self::formatColName($matches[2]),
+                    self::formatColName($matches[1]),
+                    self::formatColName($matches[3]),
+                    'ASC'
+            );
+        } elseif(preg_match('/getAll(.*)By(.*)/', $name, $matches)) {
+            //getAllHogeByFugaでFugaカラムをキーにHogeカラムの値を取得
+            return $this->getAllColByKey(
+                    $arguments[0],
+                    self::formatColName($matches[2]),
+                    self::formatColName($matches[1])
+            );
+        } elseif(preg_match('/get(.*)By(.*)/', $name, $matches)) {
+            //getHogeByFugaでFugaカラムをキーにHogeカラムの値を取得
+            return $this->getColByKey(
+                    $arguments[0],
+                    self::formatColName($matches[2]),
+                    self::formatColName($matches[1])
+            );
+        } elseif(substr($name, 0, 8) == 'updateBy') {
+            //updateByHogeでHogeカラムをキーに1レコード更新
+            return $this->updateByKey($arguments[0], $arguments[1], self::formatColName(substr($name, 8)));
+        } elseif(substr($name, 0, 8) == 'deleteBy') {
+            //deleteByHogeでHogeカラムをキーに1レコード削除
+            return $this->deleteByKey($arguments[0], self::formatColName(substr($name, 8)));
+        } elseif(substr($name, 0, 9) == 'replaceBy') {
+            //replaceByHogeでHogeカラムをキーに1レコードリプレース
+            return $this->replaceByKey($arguments[0], $arguments[1], self::formatColName(substr($name, 9)));
         }
-        //updateByHogeでHogeカラムをキーに1レコード更新
-        elseif(substr($name, 0, 8) == 'updateBy'){
-            return $this->updateByKey($arguments[0], $arguments[1], lcfirst(substr($name, 8)));
-        }
-        //deleteByHogeでHogeカラムをキーに1レコード削除
-        elseif(substr($name, 0, 8) == 'deleteBy'){
-            return $this->deleteByKey($arguments[0], lcfirst(substr($name, 8)));
-        }
-        //replaceByHogeでHogeカラムをキーに1レコードリプレース
-        elseif(substr($name, 0, 9) == 'replaceBy'){
-            return $this->replaceByKey($arguments[0], $arguments[1], lcfirst(substr($name, 9)));
-        }
-
+        
     }
-
-    protected function connect($dbConnectionKey, $dbConfig){
+    
+    public static function formatColName($colName)
+    {
+        return lcfirst($colName);
+    }
+    
+    protected function connect($dbConnectionKey, $dbConfig)
+    {
         try {
-            $dsn = $dbConfig['type'] . ':dbname=' . $dbConfig['name'] . ';host=' . $dbConfig['serverName'];
-            self::$pdo[$dbConnectionKey] = new PDO($dsn, $dbConfig['userName'], $dbConfig['userPassword']);
+            $dsn = $dbConfig['dsn']['type'] . ':';
+            unset($dbConfig['dsn']['type']);
+            
+            foreach($dbConfig['dsn'] as $k=>$v){
+                $tokens[] = '$k=$v';
+            }
+            $dsn .= implode(';', $tokens);
+            
+            self::$pdo[$dbConnectionKey] = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
             self::$pdo[$dbConnectionKey]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->dbConnectionKey = $dbConnectionKey;
-        }
-        catch (PDOException $e) {
-        	throw $e;
+        } catch (PDOException $e) {
+            $log['message'] = $e->getMessage();
+            $log['trace'] = $e->getTrace();
+            Log::write($log);
         }
     }
-
+    
     //paginator付き
-    public function fetchAllWithPaginator($sql, $inputParameters=array(), $perPage = 10, $currentPage=1, $pageWidth=3){
-
+    public function fetchAllWithPaginator($sql, $inputParameters=array(), $perPage = 10, $currentPage=1, $pageWidth=3)
+    {
+        
         $offset = ($currentPage-1)*$perPage;
         $limit = ' LIMIT ' . intval($offset) . ', ' . intval($perPage) . ' ';//PDO limit bug
-
-        if($data = $this->fetchAll($sql.$limit, $inputParameters)){
-
+        
+        if ($data = $this->fetchAll($sql.$limit, $inputParameters)) {
+            
             $result['data'] = $data;
-
+            
             $totalHit = $this->fetchOne('SELECT COUNT(*) FROM (' . $sql . ') AS paginator_tmp', $inputParameters);
             $last = ceil($totalHit/$perPage);
             $first = 1;
-
-            for($i=($currentPage-$pageWidth); $i<($currentPage+$pageWidth); $i++){
+            
+            for ($i=($currentPage-$pageWidth); $i<($currentPage+$pageWidth); $i++) {
                 if($i>0 && $i<=$last){
                     $pages[] = $i;
                 }
             }
-
-            if($currentPage > $first){
+            
+            if ($currentPage > $first) {
                 $back = $currentPage-1;
-            }else{
+            } else {
                 $back = false;
             }
-            if($currentPage < $last){
+            if ($currentPage < $last) {
                 $next = $currentPage+1;
-            }else{
+            } else {
                 $next = false;
             }
-
-            if($currentPage == $first){
+            
+            if ($currentPage == $first) {
                $paginator['first'] = false;
-            }else{
+            } else {
                $paginator['first'] = $first;
             }
-            if($currentPage == $last){
+            if ($currentPage == $last) {
                 $paginator['last'] = false;
-            }else{
+            } else {
                 $paginator['last'] = $last;
             }
-
+            
             $paginator['next'] = $next;
             $paginator['back'] = $back;
             $paginator['totalHit'] = $totalHit;
             $paginator['offset'] =$offset;
             $paginator['pages'] = $pages;
             $paginator['currentPage'] = $currentPage;
-
+            
             $result['paginator'] = $paginator;
-
+            
             return $result;
-        }else{
+        } else {
             return false;
         }
     }
-
+    
     //プレースホルダーを利用して全件取得
-    public function fetchAll($sql, $inputParameters=array()){
+    public function fetchAll($sql, $inputParameters=array())
+    {
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
-        if($sth->execute($inputParameters)){
+        if ($sth->execute($inputParameters)) {
             return $sth->fetchAll();
-        }else{
+        } else {
             return false;
         }
     }
-
+    
     //プレースホルダーを利用して最初の一件取得
-    public function fetchRow($sql, $inputParameters=array()){
-        if($result = $this->fetchAll($sql, $inputParameters)){
+    public function fetchRow($sql, $inputParameters=array())
+    {
+        if ($result = $this->fetchAll($sql, $inputParameters)) {
             return $result[0];
-        }else{
+        } else {
             return false;
         }
     }
-
+    
     //プレースホルダーを利用して最初の一件の最初のカラム値を取得
-    public function fetchOne($sql, $inputParameters=array()){
-        if($result = $this->fetchRow($sql, $inputParameters)){
+    public function fetchOne($sql, $inputParameters=array())
+    {
+        if ($result = $this->fetchRow($sql, $inputParameters)) {
             return $result[0];
-        }else{
+        } else {
             return false;
         }
     }
-
+    
     //プレースホルダを利用してSQL直実行
-    public function execute($sql, $inputParameters=array()){
+    public function execute($sql, $inputParameters=array())
+    {
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         return $sth->execute($inputParameters);
     }
-
-    public function insert($data){
-
-        if(!isset($data['createdAt'])){
+    
+    public function insert($data)
+    {
+        
+        if (!isset($data['createdAt'])) {
             $data['createdAt'] = date('Y-m-d H:i:s');
         }
-
+        
         $formatData = self::formatData($data);
-
+        
         $sql =
         'INSERT INTO ' . $this->tableName . ' (' . implode(',', array_keys($data)) . ') ' .
         'VALUES ( ' . implode(',', array_keys($formatData)) . ' )';
-
-        if($this->execute($sql, $formatData)){
+        
+        if ($this->execute($sql, $formatData)) {
             return self::$pdo[$this->dbConnectionKey]->lastInsertId();
-        }else{
-            return false;
-        }
-    }
-
-    public function getByKey($keyValue, $keyName='id'){
-        $sql =
-        'SELECT * FROM ' . $this->tableName . ' ' .
-        'WHERE ' . $keyName . ' = :' . $keyName;
-
-        if($result = $this->fetchRow($sql, array(':'.$keyName=>$keyValue))){
-            return $result;
-        }else{
-            return false;
-        }
-    }
-
-    public function getAllByKey($keyValue, $keyName='id'){
-        $sql =
-        'SELECT * FROM ' . $this->tableName . ' ' .
-        'WHERE ' . $keyName . ' = :' . $keyName;
-    
-        if($result = $this->fetchAll($sql, array(':'.$keyName=>$keyValue))){
-            return $result;
-        }else{
+        } else {
             return false;
         }
     }
     
-    public function getColByKey($keyValue, $keyName='id', $colName='name'){
-
-        if(!$result = $this->getByKey($keyValue, $keyName)){
+    public function getByKey($keyValue, $keyName='id')
+    {
+        $sql =
+        'SELECT * FROM ' . $this->tableName . ' ' .
+        'WHERE ' . $keyName . ' = :' . $keyName;
+        
+        if ($result = $this->fetchRow($sql, array(':'.$keyName=>$keyValue))) {
+            return $result;
+        } else {
             return false;
         }
-
-        if(!isset($result[$colName])){
+    }
+    
+    public function getAllByKey($keyValue, $keyName='id', $orderCol=null, $orderSeq='DESC')
+    {
+        
+        if (!$orderCol) {
+            $orderCol = $keyName;
+        }
+        
+        $sql =
+        'SELECT * FROM $this->tableName ' .
+        'WHERE $keyName  = :$keyName ' .
+        'ORDER BY $orderCol $orderSec ';
+        
+        if ($result = $this->fetchAll($sql, array(':'.$keyName=>$keyValue))) {
+            return $result;
+        } else {
             return false;
         }
-
-        return $result[$colName];
     }
-
-    public function replaceByKey($data, $keyName = 'id'){
-        //update
-        if(isset($data[$keyName]) && $data[$keyName]){
-          return $this->updateByKey($data[$keyName], $data, $keyName);
+    
+    public function getColByKey($keyValue, $keyName='id', $selectCol='name')
+    {
+        
+        if (!$result = $this->getByKey($keyValue, $keyName)) {
+            return false;
         }
-        //insert
-        else{
-          return $this->insert($data);
+        
+        if (!isset($result[$selectCol])) {
+            return false;
+        }
+        
+        return $result[$selectCol];
+    }
+    
+    public function getAllColByKey($keyValue, $keyName='id', $selectCol='name', $orderCol=null, $orderSeq='DESC')
+    {
+        
+        if (!$temp = $this->getAllByKey($keyValue, $keyName)) {
+            return false;
+        }
+        foreach ($temp as $k=>$v) {
+            if (!isset($v[$selectCol])) {
+                return false;
+            }
+            $result[$k] = $v[$selectCol];
+        }
+        return $result;
+    }
+    
+    public function replaceByKey($data, $keyName = 'id')
+    {
+        if (isset($data[$keyName]) && $data[$keyName]) {
+            //update
+            return $this->updateByKey($data[$keyName], $data, $keyName);
+        } else {
+            //insert
+            return $this->insert($data);
         }
     }
-
-    public function deleteByKey($keyValue, $keyName='id'){
+    
+    public function deleteByKey($keyValue, $keyName='id')
+    {
         $sql =
         'DELETE FROM ' . $this->tableName . ' ' .
         'WHERE ' . $keyName . ' = :' . $keyName;
         return $this->execute($sql, array(':'.$keyName=>$keyValue));
     }
-
-    public function updateByKey($keyValue, $data, $keyName='id'){
-
-        if(!isset($data['updatedAt'])){
+    
+    public function updateByKey($keyValue, $data, $keyName='id')
+    {
+        
+        if (!isset($data['updatedAt'])) {
             $data['updatedAt'] = date('Y-m-d H:i:s');
         }
-
-        if(isset($data[$keyName])){
+        
+        if (isset($data[$keyName])) {
           unset($data[$keyName]);
         }
-
+        
         $formatData = self::formatData($data);
-        foreach($data as $k=>$v){
+        foreach ($data as $k=>$v) {
             $set[] = $k . '=:' . $k;
         }
-
+        
         $sql =
         'UPDATE ' . $this->tableName . ' ' .
         'SET ' . implode(',', $set) . ' ' .
         'WHERE ' . $keyName . ' = :'.$keyName;
-
+        
         $formatData[':id'] = $keyValue;
         return $this->execute($sql, $formatData);
     }
-
-    static public function formatData($data){
-        foreach($data as $k=>$v){
+    
+    public static function formatData($data)
+    {
+        foreach ($data as $k=>$v) {
             $formatData[':' . $k] = $v;
         }
         return $formatData;
     }
-
 }

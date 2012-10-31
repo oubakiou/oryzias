@@ -1,27 +1,35 @@
 <?php
 namespace Oryzias;
-class Request{
 
-    public function __construct(){
-        $this->g = $this->conv($_GET);
-        $this->p = $this->conv($_POST);
-        $this->r = $this->conv($_REQUEST);
-        $this->f = $this->conv($_FILES);
-        $this->c = $this->conv($_COOKIE);
-    }
-
-    protected function conv($arr = array()){
-        return $arr;
-    }
-
-    static function r_mb_convert_encoding($arr, $toEncoding, $fromEncoding){
-        if(is_array($arr)){
-            foreach($arr as $k=>$v){
-                $arr[$k] = $this->r_mb_convert_encoding($v, $toEncoding, $fromEncoding);
-            }
-        }else{
-            return mb_convert_encoding($str, $toEncoding, $fromEncoding);
+class Request
+{
+    public $converters;
+    
+    public function __construct($outputCharset, $internalCharset)
+    {
+        $this->g = $this->convert($_GET);
+        $this->p = $this->convert($_POST);
+        $this->r = $this->convert($_REQUEST);
+        $this->f = $_FILES;
+        $this->c = $_COOKIE;
+        
+        //出力HTMLの文字セットと内部文字セットが食い違えばコンバータ追加
+        if ($outputCharset != $internalCharset) {
+            $this->converters[] = function ($val){
+                return Util::rMbConvertEncoding($val, $outputCharset, $internalCharset);
+            };
         }
-        return $arr;
+        
+    }
+    
+    protected function convert($arr = array())
+    {
+        if ($this->converters) {
+            foreach ($this->converters as $converter) {
+                return $converter($arr);
+            }
+        } else {
+            return $arr;
+        }
     }
 }

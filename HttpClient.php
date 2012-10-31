@@ -1,31 +1,33 @@
 <?php
 namespace Oryzias;
-class HttpClient{
 
+class HttpClient
+{
     private $uaVersion = '0.1';
     public $timeoutSec = 5;
     
     // $urlList = [["url"=>$url, "lastCheckDatetime"=>$datetime],...]
-    public function request($urlList){
+    public function request($urlList)
+    {
         
         $result = [];
         
         //マルチハンドラの作成
         $mch = curl_multi_init();
         
-        foreach($urlList as $url){
+        foreach ($urlList as $url) {
             //curlハンドラの作成
             $ch = curl_init();
             //正しい形式のURLであれば
-            if($parsedUrl = parse_url($url["url"])){
-
+            if ($parsedUrl = parse_url($url["url"])) {
+                
                 //リクエストヘッダの作成
                 $header[] = 'GET ' . $parsedUrl["path"] . '?' . $parsedUrl['query'] . ' HTTP/1.1';
                 $header[] = 'Host: ' . $parsedUrl["host"];
                 $header[] = 'User-Agent: Oryzias HttpClient - Version ' . $this->uaVersion;
-
+                
                 //指定があればIf-Modified-Sinceヘッダを付ける
-                if($lastCheckDatetime = strtotime($url["lastCheckDatetime"])){
+                if ($lastCheckDatetime = strtotime($url["lastCheckDatetime"])) {
                     $header[] = 'If-Modified-Since: '.date("r", $lastCheckDatetime);
                 }
                 
@@ -44,23 +46,23 @@ class HttpClient{
             }
         }
         
-        if($chList){
+        if ($chList) {
         
             //マルチハンドルで並列リクエスト
             $active=null;
             do {curl_multi_exec($mch, $active);} while ($active);
             
             //結果の取得
-            foreach($chList as $k=>$ch) {
+            foreach ($chList as $k=>$ch) {
                 $temp['url'] = $status["url"];
                 $temp['status'] = curl_getinfo($ch);
                 $temp['content'] = curl_multi_getcontent($ch);
                 $reuslt[$k] = $temp;
             }
         }
-
+        
         //マルチハンドルからcurlハンドル削除
-        foreach($chList as $ch){
+        foreach ($chList as $ch) {
             curl_multi_remove_handle($mch, $ch);
             curl_close($ch);
         }

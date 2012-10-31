@@ -1,13 +1,20 @@
 <?php
 namespace Oryzias;
-class Boot{
 
-    public function __construct($path){
-
+class Boot
+{
+    public function __construct($request)
+    {
+        
+        $path = '';
+        if (isset($request['path'])) {
+            $path = $request['path'];
+        }
+        
         set_include_path(
             get_include_path() . PATH_SEPARATOR .
             realpath(dirname(__FILE__).'/../../'). PATH_SEPARATOR .
-            realpath(dirname(__FILE__).'/../../Library/')
+            realpath(dirname(__FILE__).'/../../Vendor/')
         );
         
         //オートローダの追加
@@ -17,10 +24,11 @@ class Boot{
         $controllerName =  $router->getControllerName();
         new $controllerName;
     }
-
+    
     //PSR-0
-    static public function classAutoLoad($className){
-
+    public static function classAutoLoad($className)
+    {
+        
         $className = ltrim($className, '\\');
         $fileName  = '';
         $namespace = '';
@@ -30,10 +38,9 @@ class Boot{
             $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-
-        if(stream_resolve_include_path($fileName)){
+        
+        if (stream_resolve_include_path($fileName)) {
             require $fileName;
         }
     }
-
 }
