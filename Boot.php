@@ -5,7 +5,6 @@ class Boot
 {
     public function __construct($request)
     {
-        
         $path = '';
         if (isset($request['path'])) {
             $path = $request['path'];
@@ -28,7 +27,6 @@ class Boot
     //PSR-0
     public static function classAutoLoad($className)
     {
-        
         $className = ltrim($className, '\\');
         $fileName  = '';
         $namespace = '';

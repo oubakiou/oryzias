@@ -72,7 +72,6 @@ class Template
     
     protected function getConvertedTemplate($templateName)
     {
-        
         if (is_array($templateName)) {
             $templateName = $templateName[1];
         }

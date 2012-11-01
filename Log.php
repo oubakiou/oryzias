@@ -5,6 +5,7 @@ class Log
 {
     public static function write($arr)
     {
-        error_log(json_encode($arr), 3, Config::get('logDir'));
+        $arr['createdAt'] = date('Y-m-d H:i:s');
+        error_log(json_encode($arr) . "\n", 3, Config::get('logDir') . '/' . date('Y-m-d') . '.json');
     }
 }

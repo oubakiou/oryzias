@@ -19,7 +19,6 @@ class Util
     //再帰的HTMLエスケープ
     public static function h($val, $flags=ENT_QUOTES, $encoding='UTF-8', $double_encode=true)
     {
-    
         if (is_array($val)) {
             foreach ($val as $k=>$v) {
                 $val[$k] = self::h($v, $flags, $encoding, $double_encode);

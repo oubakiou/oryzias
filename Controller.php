@@ -12,6 +12,8 @@ Abstract class Controller
     protected $template;
     protected $req;
     
+    protected $xFrameOptions = 'DENY';
+    
     public function __construct()
     {
         $this->init();
@@ -26,7 +28,6 @@ Abstract class Controller
     
     public function __get($name)
     {
-    
         $token = explode('_', $name);
         
         if ($token[0] == 'Db') {
@@ -73,7 +74,6 @@ Abstract class Controller
     
     protected function init()
     {
-        
         $this->setTimezone();
         $this->checkScheme();
         $this->session();
@@ -137,7 +137,6 @@ Abstract class Controller
     
     protected function view()
     {
-        
         //テンプレートの指定が無ければコントローラ名と対応したテンプレートを設定
         if (!$this->template->getTemplate()) {
             $templateName = str_replace('_', '/', substr(get_class($this), 11));
@@ -153,7 +152,9 @@ Abstract class Controller
         $this->template->assign('c', $this->c);
         $this->template->assign('s', $this->s);
         
-        header('X-FRAME-OPTIONS: DENY');
+        if ($this->xFrameOptions) {
+            header('X-FRAME-OPTIONS: ' . $this->xFrameOptions);
+        }
         $this->template->view();
     }
 }

@@ -14,7 +14,6 @@ class Image extends File
     
     public function __construct()
     {
-        
         if ($uploadFileMaxSize = Config::get('image.uploadFileMaxSize')) {
             $this->allowFileSize = $uploadFileMaxSize;
         } else {
@@ -24,7 +23,6 @@ class Image extends File
     
     public function checkFile($file)
     {
-        
         if (!$this->isUploadedFile($file['tmp_name'])) {
             return false;
         }
@@ -51,7 +49,6 @@ class Image extends File
     
     public function setImageInfo($tmpFileName)
     {
-        
         if (!$info = getimagesize($tmpFileName)) {
             $this->err[] = '画像情報の取得に失敗しました';
             return false;
@@ -74,7 +71,6 @@ class Image extends File
     //縦横比を維持して上限を満たすようリサイズして保存
     public function saveResizeImage($dstFilePath, $maxWidth, $maxHeight)
     {
-        
         if (!$dstFilePath) {
             return false;
         }

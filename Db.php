@@ -11,87 +11,85 @@ abstract class Db
     
     public function __construct($dbConnectionKey, $dbConfig)
     {
-        
         if (!isset(self::$pdo[$dbConnectionKey])) {
             $this->connect($dbConnectionKey, $dbConfig);
         }
         
-        $this->tableName = array_pop(explode('_', get_class($this)));
-        
+        if (!$this->tableName) {
+            $this->tableName = array_pop(explode('_', get_class($this)));
+        }
     }
     
     public function __call($name, $arguments)
     {
         if (substr($name, 0, 5) == 'getBy') {
             //getByHogeでHogeカラムをキーに1レコード取得
-            return $this->getByKey($arguments[0], self::formatColName(substr($name, 5)));
-        }
-        elseif (preg_match('/getAllBy(.*)OrderBy(.*)Desc/', $name, $matches)) {
+            return $this->getByKey($arguments[0], $this->formatColName(substr($name, 5)));
+        } elseif (preg_match('/getAllBy(.*)OrderBy(.*)Desc/', $name, $matches)) {
             //getAllByHogeOrderByFugaDescでHogeカラムをキーにFugaで降順ソートした対象の全レコード取得
             return $this->getAllByKey(
                     $arguments[0],
-                    self::formatColName($matches[1]),
-                    self::formatColName($matches[2]),
+                    $this->formatColName($matches[1]),
+                    $this->formatColName($matches[2]),
                     'DESC'
             );
-        }
-        elseif (preg_match('/getAllBy(.*)OrderBy(.*)Asc/', $name, $matches)) {
+        } elseif (preg_match('/getAllBy(.*)OrderBy(.*)Asc/', $name, $matches)) {
             //getAllByHogeOrderByFugaDescでHogeカラムをキーにFugaで昇順ソートした対象の全レコード取得
             return $this->getAllByKey(
                     $arguments[0],
-                    self::formatColName($matches[1]),
-                    self::formatColName($matches[2]),
+                    $this->formatColName($matches[1]),
+                    $this->formatColName($matches[2]),
                     'ASC'
             );
-        } elseif(substr($name, 0, 8) == 'getAllBy') {
+        } elseif (substr($name, 0, 8) == 'getAllBy') {
             //getAllByHogeでHogeカラムをキーに対象の全レコード取得
-            return $this->getAllByKey($arguments[0], self::formatColName(substr($name, 8)));
-        } elseif(preg_match('/getAll(.*)By(.*)OrderBy(.*)Desc/', $name, $matches)) {
+            return $this->getAllByKey($arguments[0], $this->formatColName(substr($name, 8)));
+        } elseif (preg_match('/getAll(.*)By(.*)OrderBy(.*)Desc/', $name, $matches)) {
             //getAllHogeByFugaOrderByPiyoDescでFugaカラムをキーPiyoで降順ソートされたHogeカラムの値を取得
             return $this->getAllColByKey(
                     $arguments[0],
-                    self::formatColName($matches[2]),
-                    self::formatColName($matches[1]),
-                    self::formatColName($matches[3]),
+                    $this->formatColName($matches[2]),
+                    $this->formatColName($matches[1]),
+                    $this->formatColName($matches[3]),
                     'DESC'
             );
-        } elseif(preg_match('/getAll(.*)By(.*)OrderBy(.*)Asc/', $name, $matches)) {
+        } elseif (preg_match('/getAll(.*)By(.*)OrderBy(.*)Asc/', $name, $matches)) {
             //getAllHogeByFugaOrderByPiyoDescでFugaカラムをキーPiyoで昇順ソートされたHogeカラムの値を取得
             return $this->getAllColByKey(
                     $arguments[0],
-                    self::formatColName($matches[2]),
-                    self::formatColName($matches[1]),
-                    self::formatColName($matches[3]),
+                    $this->formatColName($matches[2]),
+                    $this->formatColName($matches[1]),
+                    $this->formatColName($matches[3]),
                     'ASC'
             );
-        } elseif(preg_match('/getAll(.*)By(.*)/', $name, $matches)) {
+        } elseif (preg_match('/getAll(.*)By(.*)/', $name, $matches)) {
             //getAllHogeByFugaでFugaカラムをキーにHogeカラムの値を取得
             return $this->getAllColByKey(
                     $arguments[0],
-                    self::formatColName($matches[2]),
-                    self::formatColName($matches[1])
+                    $this->formatColName($matches[2]),
+                    $this->formatColName($matches[1])
             );
-        } elseif(preg_match('/get(.*)By(.*)/', $name, $matches)) {
+        } elseif (preg_match('/get(.*)By(.*)/', $name, $matches)) {
             //getHogeByFugaでFugaカラムをキーにHogeカラムの値を取得
             return $this->getColByKey(
                     $arguments[0],
-                    self::formatColName($matches[2]),
-                    self::formatColName($matches[1])
+                    $this->formatColName($matches[2]),
+                    $this->formatColName($matches[1])
             );
-        } elseif(substr($name, 0, 8) == 'updateBy') {
+        } elseif (substr($name, 0, 8) == 'updateBy') {
             //updateByHogeでHogeカラムをキーに1レコード更新
-            return $this->updateByKey($arguments[0], $arguments[1], self::formatColName(substr($name, 8)));
-        } elseif(substr($name, 0, 8) == 'deleteBy') {
+            return $this->updateByKey($arguments[0], $arguments[1], $this->formatColName(substr($name, 8)));
+        } elseif (substr($name, 0, 8) == 'deleteBy') {
             //deleteByHogeでHogeカラムをキーに1レコード削除
-            return $this->deleteByKey($arguments[0], self::formatColName(substr($name, 8)));
+            return $this->deleteByKey($arguments[0], $this->formatColName(substr($name, 8)));
         } elseif(substr($name, 0, 9) == 'replaceBy') {
             //replaceByHogeでHogeカラムをキーに1レコードリプレース
-            return $this->replaceByKey($arguments[0], $arguments[1], self::formatColName(substr($name, 9)));
+            return $this->replaceByKey($arguments[0], $arguments[1], $this->formatColName(substr($name, 9)));
         }
         
     }
     
-    public static function formatColName($colName)
+    public function formatColName($colName)
     {
         return lcfirst($colName);
     }
@@ -103,7 +101,7 @@ abstract class Db
             unset($dbConfig['dsn']['type']);
             
             foreach($dbConfig['dsn'] as $k=>$v){
-                $tokens[] = '$k=$v';
+                $tokens[] = $k . '=' . $v;
             }
             $dsn .= implode(';', $tokens);
             
@@ -120,7 +118,6 @@ abstract class Db
     //paginator付き
     public function fetchAllWithPaginator($sql, $inputParameters=[], $perPage = 10, $currentPage=1, $pageWidth=3)
     {
-        
         $offset = ($currentPage-1)*$perPage;
         $limit = ' LIMIT ' . intval($offset) . ', ' . intval($perPage) . ' ';//PDO limit bug
         
@@ -178,6 +175,10 @@ abstract class Db
     //プレースホルダーを利用して全件取得
     public function fetchAll($sql, $inputParameters=[])
     {
+        if (Config::get('debug')) {
+            Log::write(['sql'=>$sql, 'inputParameters'=>$inputParameters]);
+        }
+        
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         if ($sth->execute($inputParameters)) {
             return $sth->fetchAll();
@@ -209,13 +210,16 @@ abstract class Db
     //プレースホルダを利用してSQL直実行
     public function execute($sql, $inputParameters=[])
     {
+        if (Config::get('debug')) {
+            Log::write(['sql'=>$sql, 'inputParameters'=>$inputParameters]);
+        }
+        
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         return $sth->execute($inputParameters);
     }
     
     public function insert($data)
     {
-        
         if (!isset($data['createdAt'])) {
             $data['createdAt'] = date('Y-m-d H:i:s');
         }
@@ -248,15 +252,14 @@ abstract class Db
     
     public function getAllByKey($keyValue, $keyName='id', $orderCol=null, $orderSeq='DESC')
     {
-        
         if (!$orderCol) {
             $orderCol = $keyName;
         }
         
         $sql =
-        'SELECT * FROM $this->tableName ' .
-        'WHERE $keyName  = :$keyName ' .
-        'ORDER BY $orderCol $orderSec ';
+        'SELECT * FROM ' . $this->tableName . ' ' .
+        'WHERE ' . $keyName . ' = :' . $keyName . ' ' .
+        'ORDER BY ' . $orderCol . ' ' . $orderSec . ' ';
         
         if ($result = $this->fetchAll($sql, [':'.$keyName=>$keyValue])) {
             return $result;
@@ -267,7 +270,6 @@ abstract class Db
     
     public function getColByKey($keyValue, $keyName='id', $selectCol='name')
     {
-        
         if (!$result = $this->getByKey($keyValue, $keyName)) {
             return false;
         }
@@ -281,7 +283,6 @@ abstract class Db
     
     public function getAllColByKey($keyValue, $keyName='id', $selectCol='name', $orderCol=null, $orderSeq='DESC')
     {
-        
         if (!$temp = $this->getAllByKey($keyValue, $keyName)) {
             return false;
         }
@@ -315,7 +316,6 @@ abstract class Db
     
     public function updateByKey($keyValue, $data, $keyName='id')
     {
-        
         if (!isset($data['updatedAt'])) {
             $data['updatedAt'] = date('Y-m-d H:i:s');
         }

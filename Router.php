@@ -12,7 +12,6 @@ class Router
     
     public function setPath($path)
     {
-        
         if (!$path || ($path == 'index.php')) {
             $path = 'Index';
         }
@@ -22,7 +21,6 @@ class Router
     
     public function getControllerName()
     {
-        
         if ($routingRules = Config::get('routingRules')) {
             foreach ($routingRules as $rule) {
                 if (preg_match_all($rule['pathPattern'], $this->path, $params, PREG_PATTERN_ORDER)) {

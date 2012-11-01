@@ -6,7 +6,6 @@ class Config
     //カンマ区切りでパスを指定して設定取得
     public static function get($path)
     {
-        
         static $mergedConfig;
         if (!$mergedConfig) {
             $parentConfig = require('Config/common.php');

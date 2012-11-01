@@ -10,7 +10,6 @@ class File
     
     public function __construct()
     {
-        
         if ($uploadFileMaxSize = Config::get('file.uploadFileMaxSize')) {
             $this->allowFileSize = $uploadFileMaxSize;
         } else {
@@ -25,7 +24,6 @@ class File
     
     public function checkFile($file)
     {
-        
         if (!$this->isUploadedFile($file['tmp_name'])) {
             return false;
         }
@@ -48,7 +46,6 @@ class File
     
     protected function isAllowedMimeType($mimeType)
     {
-        
         if (!count($this->allowMimeType)) {
             return true;
         }

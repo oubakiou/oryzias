@@ -9,7 +9,6 @@ class HttpClient
     // $urlList = [["url"=>$url, "lastCheckDatetime"=>$datetime],...]
     public function request($urlList)
     {
-        
         $result = [];
         
         //マルチハンドラの作成

@@ -28,7 +28,6 @@ class Validator
     
     public function getData()
     {
-        
         if (!$this->allowKeys) {
             return $this->data;
         }
