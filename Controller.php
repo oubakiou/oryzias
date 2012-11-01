@@ -40,7 +40,7 @@ Abstract class Controller
                 //コントローラ内で$this->Db_ConnectionName_TableNameでModel_Db_ConnectionName_TableNameを取得
                 $dbConnectionKey = $token[1];
                 $tableName = $token[2];
-                $className = 'Model_Db_' . $dbConnectionKey . $tableName;
+                $className = 'Model_Db_' . $dbConnectionKey . '_' . $tableName;
             }
             
             if (!isset($this->$name)) {
