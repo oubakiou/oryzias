@@ -9,14 +9,30 @@ abstract class Db
     protected $dbConnectionKey;
     protected $tableName;
     
-    public function __construct($dbConnectionKey, $dbConfig)
+    public function __construct($dbConnectionKey = null, $dbConfig = null)
     {
+        $classNameToken = explode('_', get_class($this));
+        $classNameTokenCount = count($classNameToken);
+        
+        if (!$dbConnectionKey || !$dbConfig) {
+            if ($classNameTokenCount == 3) {
+                $dbConnectionKey = 'default';
+            } elseif ($classNameTokenCount == 4) {
+                $dbConnectionKey = $classNameTokens[2];
+            } else {
+                return false;
+            }
+            $dbConfig = Config::get('db.' . $dbConnectionKey);
+        }
+        
         if (!isset(self::$pdo[$dbConnectionKey])) {
             $this->connect($dbConnectionKey, $dbConfig);
         }
         
+        $this->dbConnectionKey = $dbConnectionKey;
+        
         if (!$this->tableName) {
-            $this->tableName = array_pop(explode('_', get_class($this)));
+            $this->tableName = array_pop($classNameToken);
         }
     }
     
@@ -107,7 +123,6 @@ abstract class Db
             
             self::$pdo[$dbConnectionKey] = new PDO($dsn, $dbConfig['user'], $dbConfig['password']);
             self::$pdo[$dbConnectionKey]->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->dbConnectionKey = $dbConnectionKey;
         } catch (PDOException $e) {
             $log['message'] = $e->getMessage();
             $log['trace'] = $e->getTrace();
@@ -178,7 +193,6 @@ abstract class Db
         if (Config::get('debug')) {
             Log::write(['sql'=>$sql, 'inputParameters'=>$inputParameters]);
         }
-        
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         if ($sth->execute($inputParameters)) {
             return $sth->fetchAll();
