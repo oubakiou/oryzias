@@ -359,4 +359,46 @@ abstract class Db
         }
         return $formatData;
     }
+    
+    public function buildSelect($cond)
+    {
+        $sql = 'SELECT ';
+        if (isset($cond['select'])) {
+            $sql .= implode(',', $cond['select']) . " \n";
+        } else {
+            $sql .= "* \n";
+        }
+        
+        $sql .= 'FROM ';
+        if (isset($cond['from'])) {
+            $sql .= $cond['from'] . " \n";
+        } else {
+            $sql .= $this->tableName . " \n";
+        }
+        
+        if (isset($cond['join'])) {
+            foreach ($cond['join'] as $join) {
+                $sql .= 'INNER JOIN ' . $join[0] . ' ON ' . $join[1] . " \n";
+            }
+        }
+        
+        if (isset($cond['leftJoin'])) {
+            foreach ($cond['leftJoin'] as $join) {
+                $sql .= 'LEFT JOIN ' . $join[0] . ' ON ' . $join[1] . " \n";
+            }
+        }
+        
+        if (isset($cond['where'])) {
+            $sql .= 'WHERE ' . implode(" \nAND ", $cond['where']) . " \n";
+        }
+        
+        if (isset($cond['groupBy'])) {
+            $sql .= 'GROUP BY ' . implode(',', $cond['groupBy']) . " \n";
+        }
+        if (isset($cond['orderBy'])) {
+            $sql .= 'ORDER BY ' . implode(',', $cond['orderBy']) . " \n";
+        }
+        
+        return $sql;
+    }
 }

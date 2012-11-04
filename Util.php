@@ -32,11 +32,4 @@ class Util
         }
         return $val;
     }
-    
-    //リダイレクト
-    public static function r($url, $replace = true, $http_response_code=302)
-    {
-        header('Location: ' . $url, $replace, $http_response_code);
-        exit;
-    }
 }

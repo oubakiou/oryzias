@@ -7,6 +7,7 @@ class Validator
     protected $data;
     protected $inputCharset;
     protected $rules;
+    protected $filterRules;
     protected $error;
     protected $allowKeys;
     
@@ -28,16 +29,27 @@ class Validator
     
     public function getData()
     {
-        if (!$this->allowKeys) {
-            return $this->data;
-        }
-        
         $result = [];
-        foreach ($this->data as $k=>$v) {
-            if (in_array($k, $this->allowKeys)) {
-                $result[$k] = $v;
+        //許可キーのみ抽出
+        if (!$this->allowKeys) {
+            $result = $this->data;
+        } else {
+            foreach ($this->data as $k=>$v) {
+                if (in_array($k, $this->allowKeys)) {
+                    $result[$k] = $v;
+                }
             }
         }
+        
+        //フィルター適用
+        if ($this->filterRules) {
+            foreach ($this->filterRules as $dataKey=>$filterNames) {
+                foreach ($filterNames as $filterName) {
+                    $result[$dataKey] = $this->$filterName($result[$dataKey]);
+                }
+            }
+        }
+        
         return $result;
     }
     
@@ -207,5 +219,15 @@ class Validator
         } else {
             return false;
         }
+    }
+    
+    public function trim($input)
+    {
+        return trim($input);
+    }
+    
+    public function kanaNormalization($input)
+    {
+        return mb_convert_kana($input, 'asK', $this->inputCharset);
     }
 }

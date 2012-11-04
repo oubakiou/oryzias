@@ -157,4 +157,11 @@ Abstract class Controller
         }
         $this->template->view();
     }
+    
+    //リダイレクト
+    public static function r($url, $replace = true, $httpResponseCode=302)
+    {
+        header('Location: ' . $url, $replace, $httpResponseCode);
+        exit;
+    }
 }
