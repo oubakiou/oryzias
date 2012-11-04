@@ -111,7 +111,7 @@ class Template
     protected function execute($convertedTemplate)
     {
         if (isset($this->params)) {
-            extract(Util::h($this->params, ENT_QUOTES, $this->config['outputCharset'], true));
+            extract(Util::h($this->params, ENT_QUOTES, Config::get('internalCharset'), true));
         }
         if (isset($this->unEscapedParams)) {
             extract($this->unEscapedParams);

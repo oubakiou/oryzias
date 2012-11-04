@@ -195,7 +195,7 @@ abstract class Db
         }
         $sth = self::$pdo[$this->dbConnectionKey]->prepare($sql);
         if ($sth->execute($inputParameters)) {
-            return $sth->fetchAll();
+            return $sth->fetchAll(PDO::FETCH_ASSOC);
         } else {
             return false;
         }

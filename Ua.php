@@ -41,28 +41,28 @@ class Ua
     
     public static function isDocomoFeaturePhone($ua)
     {
-        if (stripos($ua, 'DoCoMo') === false) {
-            return false;
-        } else {
+        if (!self::isSmartPhone($ua) && (stripos($ua, 'DoCoMo') !== false)) {
             return true;
+        } else {
+            return false;
         }
     }
     
     public static function isAuFeaturePhone($ua)
     {
-        if (stripos($ua, 'KDDI') === false) {
-            return false;
-        } else {
+        if (!self::isSmartPhone($ua) && (stripos($ua, 'KDDI') !== false)) {
             return true;
+        } else {
+            return false;
         }
     }
     
     public static function isSoftBankFeaturePhone($ua)
     {
-        if (stripos($ua, 'SoftBank') === false) {
-            return false;
-        } else {
+        if (!self::isSmartPhone($ua) && (stripos($ua, 'SoftBank') !== false)) {
             return true;
+        } else {
+            return false;
         }
     }
     
