@@ -1,27 +1,21 @@
 oryzias
 =======
 
-oryziasはだいたい概ね1500行ぐらいのフルスタックなPHPマイクロフレームワークです。
+oryziasはだいたい概ね2000行ぐらいのフルスタックなPHPマイクロフレームワークです。
 
 ##FAQ
 
-+ フォームクラスやヘルパーは無いの？
- + ありません。自分で作るか、Symfony\Component\Formを持ってくるか、Railsを使うと良いと思います。
-
-+ クエリービルダやORMは無いの？
++ ORMは無いの？
  + ありません。自分で作るか、Doctrineを持ってくるか、Railsを使うと良いと思います。SQLの息遣いを肌で感じてほしい。
 
 + ユニットテストのサポート
  + ありません。
 
-+ configにymlとか使えないの？
- + 使えません。
-
 + CLIから叩けるの？
  + curlで叩け。
 
 + 速いの？
- + xhprofでの凄くおおざっぱな計測だと、FuelPHPの10倍ぐらい。ただし機能は1/10未満。
+ + xhprofでの凄くおおざっぱな計測だと、たぶんFuelPHPの10倍ぐらい。ただし機能は1/10未満。
 
 + どんなプロジェクトで使われているの？
  + [phpMyPresentation](https://github.com/oubakiou/phpMyPresentation)（[presentation.bz](http://presentation.bz/)）で使われています。というかそのために作られました。
