@@ -205,7 +205,7 @@ abstract class Db
     public function fetchRow($sql, $inputParameters=[])
     {
         if ($result = $this->fetchAll($sql, $inputParameters)) {
-            return $result[0];
+            return array_shift($result);
         } else {
             return false;
         }
@@ -215,7 +215,7 @@ abstract class Db
     public function fetchOne($sql, $inputParameters=[])
     {
         if ($result = $this->fetchRow($sql, $inputParameters)) {
-            return $result[0];
+            return array_shift($result);
         } else {
             return false;
         }
