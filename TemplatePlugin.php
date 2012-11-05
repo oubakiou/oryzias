@@ -43,4 +43,10 @@ class TemplatePlugin
     {
         return $this->output(date($format, strtotime($str)));
     }
+    
+    //オートリンク
+    public function autoLink($str, $target='')
+    {
+        return preg_replace('/(https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+)/', '<a href="$1" target="' . $target . '">$1</a>', $str);
+    }
 }
