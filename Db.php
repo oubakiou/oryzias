@@ -364,7 +364,7 @@ abstract class Db
     {
         $sql = 'SELECT ';
         if (isset($cond['select'])) {
-            $sql .= implode(',', $cond['select']) . " \n";
+            $sql .= implode(', ', $cond['select']) . " \n";
         } else {
             $sql .= "* \n";
         }
@@ -393,10 +393,10 @@ abstract class Db
         }
         
         if (isset($cond['groupBy'])) {
-            $sql .= 'GROUP BY ' . implode(',', $cond['groupBy']) . " \n";
+            $sql .= 'GROUP BY ' . implode(', ', $cond['groupBy']) . " \n";
         }
         if (isset($cond['orderBy'])) {
-            $sql .= 'ORDER BY ' . implode(',', $cond['orderBy']) . " \n";
+            $sql .= 'ORDER BY ' . implode(', ', $cond['orderBy']) . " \n";
         }
         
         return $sql;
