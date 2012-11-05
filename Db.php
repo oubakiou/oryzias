@@ -18,7 +18,7 @@ abstract class Db
             if ($classNameTokenCount == 3) {
                 $dbConnectionKey = 'default';
             } elseif ($classNameTokenCount == 4) {
-                $dbConnectionKey = $classNameTokens[2];
+                $dbConnectionKey = $classNameToken[2];
             } else {
                 return false;
             }
