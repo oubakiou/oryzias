@@ -134,7 +134,7 @@ abstract class Db
     public function fetchAllWithPaginator($sql, $inputParameters=[], $perPage = 10, $currentPage=1, $pageWidth=3)
     {
         $offset = ($currentPage-1)*$perPage;
-        $limit = ' LIMIT ' . intval($offset) . ', ' . intval($perPage) . ' ';//PDO limit bug
+        $limit = ' LIMIT ' . intval($perPage) . ' OFFSET ' . intval($offset) . ' ';
         
         if ($data = $this->fetchAll($sql.$limit, $inputParameters)) {
             
