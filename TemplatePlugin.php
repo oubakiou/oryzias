@@ -49,4 +49,18 @@ class TemplatePlugin
     {
         return preg_replace('/(https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:@&=+$,%#]+)/', '<a href="$1" target="' . $target . '">$1</a>', $str);
     }
+    
+    //URL生成
+    public function url($params, $path=null)
+    {
+        $g = $_GET;
+        if (!$path && isset($g['path'])) {
+            $path = $g['path'];
+            unset($g['path']);
+        }
+        
+        $params = array_merge($g, $params);
+        
+        $this->output('/' . $path . '?' . http_build_query($params));
+    }
 }
