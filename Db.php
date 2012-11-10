@@ -174,10 +174,17 @@ abstract class Db
             
             $paginator['next'] = $next;
             $paginator['back'] = $back;
+            
+            $paginator['firstHit'] = $offset+1;
+            $paginator['lastHit'] = $offset+$perPage;
+            if ($paginator['lastHit'] > $totalHit) {
+                $paginator['lastHit'] = $totalHit;
+            }
+            
             $paginator['totalHit'] = $totalHit;
             $paginator['offset'] =$offset;
             $paginator['pages'] = $pages;
-            $paginator['currentPage'] = $currentPage;
+            $paginator['current'] = $currentPage;
             
             $result['paginator'] = $paginator;
             
