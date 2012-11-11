@@ -158,6 +158,11 @@ Abstract class Controller
         $this->template->view();
     }
     
+    protected function assign()
+    {
+        $this->template->assign($paramName, $paramValue);
+    }
+    
     //リダイレクト
     public static function r($url, $replace = true, $httpResponseCode=302)
     {

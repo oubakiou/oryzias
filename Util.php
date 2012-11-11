@@ -32,4 +32,17 @@ class Util
         }
         return $val;
     }
+    
+    public static function d($var)
+    {
+        echo '<pre>';
+        var_dump($var);
+        echo '</pre><hr />';
+    }
+    
+    public static function dd($var)
+    {
+        self::d($var);
+        exit;
+    }
 }
