@@ -364,6 +364,9 @@ abstract class Db
     {
         $sql = 'SELECT ';
         if (isset($cond['select'])) {
+            if (!is_array($cond['select'])) {
+                $cond['select'] = [$cond['select']];
+            }
             $sql .= implode(', ', $cond['select']) . " \n";
         } else {
             $sql .= "* \n";
@@ -377,25 +380,41 @@ abstract class Db
         }
         
         if (isset($cond['join'])) {
+            if (!is_array($cond['join'][0])) {
+                $cond['join'] = [$cond['join']];
+            }
+            
             foreach ($cond['join'] as $join) {
                 $sql .= 'INNER JOIN ' . $join[0] . ' ON ' . $join[1] . " \n";
             }
         }
         
         if (isset($cond['leftJoin'])) {
+            if (!is_array($cond['leftJoin'][0])) {
+                $cond['leftJoin'] = [$cond['leftJoin']];
+            }
             foreach ($cond['leftJoin'] as $join) {
                 $sql .= 'LEFT JOIN ' . $join[0] . ' ON ' . $join[1] . " \n";
             }
         }
         
         if (isset($cond['where'])) {
+            if (!is_array($cond['where'])) {
+                $cond['where'] = [$cond['where']];
+            }
             $sql .= 'WHERE ' . implode(" \nAND ", $cond['where']) . " \n";
         }
         
         if (isset($cond['groupBy'])) {
+            if (!is_array($cond['groupBy'])) {
+                $cond['groupBy'] = [$cond['groupBy']];
+            }
             $sql .= 'GROUP BY ' . implode(', ', $cond['groupBy']) . " \n";
         }
         if (isset($cond['orderBy'])) {
+            if (!is_array($cond['orderBy'])) {
+                $cond['orderBy'] = [$cond['orderBy']];
+            }
             $sql .= 'ORDER BY ' . implode(', ', $cond['orderBy']) . " \n";
         }
         
