@@ -72,14 +72,16 @@ class Form
             $selectAttr['id'] = $name . '_id';
         }
         $html = '<select ' . $this->buildAttr($selectAttr) . ' >';
-        
         foreach ($values as $k=>$v) {
             $optionAttr['value'] = $v;
             if ($v == $selectedValue) {
                 $optionAttr['selected'] = 'selected';
             }
-            $html .= '<option ' . $this->buildAttr($optionAttr) . ' />' . $label[$k];
+            $html .= '<option ' . $this->buildAttr($optionAttr) . ' />' . $label[$k] . '</option>';
+            unset($optionAttr['selected']);
         }
+        $html .= '</select>';
+        
         $this->output($html);
     }
     
