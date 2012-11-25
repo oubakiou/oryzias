@@ -19,6 +19,9 @@ class Boot
         //オートローダの追加
         spl_autoload_register(__NAMESPACE__ .'\Boot::classAutoLoad');
         
+        //ユーティリティ関数の読込
+        require_once('UtilFunctions.php');
+        
         $router = new Router($path);
         $controllerName =  $router->getControllerName();
         new $controllerName;

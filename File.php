@@ -13,7 +13,7 @@ class File
         if ($uploadFileMaxSize = Config::get('file.uploadFileMaxSize')) {
             $this->allowFileSize = $uploadFileMaxSize;
         } else {
-            $this->allowFileSize = 1048576;
+            $this->allowFileSize = 10000000;
         }
     }
     
@@ -24,15 +24,15 @@ class File
     
     public function checkFile($file)
     {
+        if (!$this->isNormalStatusCode($file['error'])) {
+            return false;
+        }
+        
         if (!$this->isUploadedFile($file['tmp_name'])) {
             return false;
         }
         
         if (!$this->isAllowedSize($file['size'])) {
-            return false;
-        }
-        
-        if (!$this->isNormalStatusCode($file['error'])) {
             return false;
         }
         

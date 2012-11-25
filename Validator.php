@@ -34,9 +34,11 @@ class Validator
         if (!$this->allowKeys) {
             $result = $this->data;
         } else {
-            foreach ($this->data as $k=>$v) {
-                if (in_array($k, $this->allowKeys)) {
-                    $result[$k] = $v;
+            foreach ($this->allowKeys as $keyName) {
+                if (isset($this->data[$keyName])) {
+                    $result[$keyName] = $this->data[$keyName];
+                } else {
+                    $result[$keyName] = '';
                 }
             }
         }

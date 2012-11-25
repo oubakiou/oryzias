@@ -64,7 +64,7 @@ class Form
         $this->output($html);
     }
     
-    public function select($name, $values=[], $attr=[], $selectedValue=null, $label = [])
+    public function select($name, $selectedValue=null, $attr=[], $values=[], $label = [])
     {
         $selectAttr = $attr;
         $selectAttr['name'] = $name;
@@ -85,7 +85,7 @@ class Form
         $this->output($html);
     }
     
-    public function radio($name, $values=[], $attr=[], $selectedValue=null, $label = [])
+    public function radio($name, $selectedValue=null, $attr=[], $values=[], $label = [])
     {
         $html = '';
         foreach ($values as $k=>$v) {
@@ -93,12 +93,13 @@ class Form
                 $attr['checked'] = 'checked';
             }
             $attr['id'] = $name . '_id[' . $k . ']';
-            $html .= '<input type="radio" ' . $this->build($name, $v, $attr) . ' />' . $label[$k];
+            $html .= '<label class="radio"><input type="radio" ' . $this->build($name, $v, $attr) . ' />' . $label[$k] . '</label>';
+            unset($attr['checked']);
         }
         $this->output($html);
     }
     
-    public function checkbox($name, $values=[], $attr=[], $selectedValue=[], $label = [])
+    public function checkbox($name, $selectedValue=[], $attr=[], $values=[] , $label = [])
     {
         $html = '';
         foreach ($values as $k=>$v) {
@@ -111,7 +112,7 @@ class Form
         $this->output($html);
     }
     
-    public function hidden()
+    public function hidden($name, $value=null, $attr=[])
     {
         $html = '<input type="hidden" ' . $this->build($name, $value, $attr) . ' />';
         $this->output($html);

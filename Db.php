@@ -320,7 +320,11 @@ abstract class Db
     {
         if (isset($data[$keyName]) && $data[$keyName]) {
             //update
-            return $this->updateByKey($data[$keyName], $data, $keyName);
+            if ($this->updateByKey($data[$keyName], $data, $keyName)) {
+                return $data[$keyName];
+            } else {
+                return false;
+            }
         } else {
             //insert
             return $this->insert($data);

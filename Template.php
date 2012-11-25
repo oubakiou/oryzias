@@ -68,6 +68,9 @@ class Template
     
     public function view()
     {
+        if ($this->config['enabledGzip']) {
+            ob_start("ob_gzhandler");
+        }
         echo $this->fetch();
     }
     

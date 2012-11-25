@@ -158,7 +158,7 @@ Abstract class Controller
         $this->template->view();
     }
     
-    protected function assign()
+    protected function assign($paramName, $paramValue)
     {
         $this->template->assign($paramName, $paramValue);
     }
