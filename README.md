@@ -18,7 +18,8 @@ oryziasはだいたい概ね2000行ぐらいのフルスタックなPHPマイク
  + xhprofでの凄くおおざっぱな計測だと、たぶんFuelPHPの10倍ぐらい。ただし機能は1/10未満。
 
 + どんなプロジェクトで使われているの？
- + [phpMyPresentation](https://github.com/oubakiou/phpMyPresentation)（[presentation.bz](http://presentation.bz/)）で使われています。というかそのために作られました。
+ + [phpMyPresentation](https://github.com/oubakiou/phpMyPresentation)（[presentation.bz](http://presentation.bz/)）
+ + [oryzias-blog](https://github.com/oubakiou/oryzias-blog) ([demo](http://blog.presentation.bz))
 
 + Nginxでの設定例
     
