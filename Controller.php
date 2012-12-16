@@ -78,12 +78,14 @@ Abstract class Controller
         $this->checkScheme();
         $this->session();
         
+        $this->ua = $_SERVER['HTTP_USER_AGENT'];
+        
         $templateConfig = Config::get('template');
-        if (Ua::isSmartPhone($_SERVER['HTTP_USER_AGENT']) && ($templateSp = Config::get('templateSp')) ) {
+        if ($this->isSmartPhone() && ($templateSp = Config::get('templateSp')) ) {
             //スマホが別テンプレートかつUAがスマホなら設定上書き
             $templateConfig = $templateSp;
         }
-        elseif (Ua::isFeaturePhone($_SERVER['HTTP_USER_AGENT']) && ($templateFp = Config::get('templateFp')) ) {
+        elseif ($this->isFeaturePhone() && ($templateFp = Config::get('templateFp')) ) {
             //ガラケーが別テンプレートかつUAがガラケーなら設定上書き
             $templateConfig = $templateFp;
         }
@@ -95,7 +97,6 @@ Abstract class Controller
         $this->r = $this->req->r;
         $this->f = $this->req->f;
         $this->c = $this->req->c;
-        $this->ua = $_SERVER['HTTP_USER_AGENT'];
         $this->s = $_SESSION;
         
         if (!isset($this->s['csrfToken'])) {
@@ -168,5 +169,15 @@ Abstract class Controller
     {
         header('Location: ' . $url, $replace, $httpResponseCode);
         exit;
+    }
+    
+    public function isSmartPhone()
+    {
+        return Ua::isSmartPhone($this->ua);
+    }
+    
+    public function isFeaturePhone()
+    {
+        return Ua::isFeaturePhone($this->ua);
     }
 }
