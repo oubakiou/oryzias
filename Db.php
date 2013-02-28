@@ -359,7 +359,7 @@ abstract class Db
         'SET ' . implode(',', $set) . ' ' .
         'WHERE ' . $keyName . ' = :'.$keyName;
         
-        $formatData[':id'] = $keyValue;
+        $formatData[':' . $keyName] = $keyValue;
         return $this->execute($sql, $formatData);
     }
     
